@@ -1,5 +1,10 @@
 import psycopg2
+import os
 
+info = [['Иван', 'Иванов', 'ii@mail.ru', ['86543214568', '85648545669', '82543696969']],
+        ['Петр', 'Петров', 'pp@mail.ru', []],
+        ['Алексей', 'Алексеев', 'aa@mail.ru',['86545252222']],
+        ['Герасим', 'Герасимов', 'gg@mail.ru', ['82456895236', '87546953652']]]
 
 def create_db(conn):
     with conn.cursor() as cur:
@@ -142,12 +147,56 @@ def find_client(conn, first_name=None, last_name=None, email=None, phone=None):
         client.append(find_phone(conn, client_id))
         return client
 
-with psycopg2.connect(database="client_base", user="vtriber", password="SuperPython43") as conn:
-    print(create_db(conn))
-    # change_client(conn, 8, 'Vik', 'Трбер', 'vtriberauscads@i.ru', ('+79256544', '56489745321'))
-    # print(find_client(conn, email='vtriber@gmail.ru'))
-conn.close()
+
+
+
+def bd_connect():
+    with psycopg2.connect(database="client_base", user="postgree", password="postgree") as conn:
+        print(create_db(conn))
+        dialog(conn)
+        # change_client(conn, 8, 'Vik', 'Трбер', 'vtriberauscads@i.ru', ('+79256544', '56489745321'))
+        # print(find_client(conn, email='vtriber@gmail.ru'))
+    conn.close()
+
+
+def dialog(conn):
+    print('Необходимо добавить данные о клиентах в базу данных')
+    print('Для автоматического добавления данных введите 1 и нажмите enter')
+    print('Для ввода данных вручную нажмите 2 и enter')
+    key = input('Введите команду: ')
+    if key == '1':
+        for inf in info:
+            first_name = inf[0]
+            last_name = inf[1]
+            mail = inf[2]
+            phones = inf[3]
+            if phones == []:
+                add_client(conn, first_name, last_name, mail)
+            else:
+                add_client(conn, first_name, last_name, mail, phones)
+    elif key == '2':
+        while True:
+            print('Введите данные клиента, если база заполнена введите "стоп"')
+            first_name = input('Введите имя: ')
+            if first_name == 'стоп':
+                break
+            last_name = input('Введите фамилию: ')
+            mail = input('Введите адрес электронной почты: ')
+            phones = []
+            while True:
+                phone = input('Введите номера телефона или "стоп" чтобы пропустить: ')
+                if phone == '':
+                    phone = input('Необходимо ввести номер телефона или "стоп" чтобы пропустить: ')
+                if phone == 'стоп':
+                    if phones == []:
+                        add_client(conn, first_name, last_name, mail)
+                    else:
+                        add_client(conn, first_name, last_name, mail, phones)
+                    break
+                phones.append(phone)
+
 
 
 
 if __name__ == '__main__':
+    bd_connect()
