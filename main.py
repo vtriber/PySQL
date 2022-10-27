@@ -1,6 +1,6 @@
 import psycopg2
-import os
 
+# Данные для автоматического заполнения базы
 info = [['Иван', 'Иванов', 'ii@mail.ru', ['86543214568', '85648545669', '82543696969']],
         ['Петр', 'Петров', 'pp@mail.ru', []],
         ['Алексей', 'Алексеев', 'aa@mail.ru',['86545252222']],
@@ -151,7 +151,7 @@ def find_client(conn, first_name=None, last_name=None, email=None, phone=None):
 
 
 def bd_connect():
-    with psycopg2.connect(database="client_base", user="postgree", password="postgree") as conn:
+    with psycopg2.connect(database="client_base", user="postgre", password="postgre") as conn:
         print(create_db(conn))
         dialog(conn)
         # change_client(conn, 8, 'Vik', 'Трбер', 'vtriberauscads@i.ru', ('+79256544', '56489745321'))
@@ -194,6 +194,71 @@ def dialog(conn):
                         add_client(conn, first_name, last_name, mail, phones)
                     break
                 phones.append(phone)
+        print()
+        print('База данных заполнена')
+        print()
+
+    while True:
+        print('Выберите команду для работы с базой данных')
+        print('1 - добавить телефон для существующего клиента')
+        print('2 - изменить данные о клиенте')
+        print('3 - удалить телефон для существующего клиента')
+        print('4 - удалить существующего клиента')
+        print('5 - найти клиента по его данным')
+        print('6 - остановить программу')
+        print()
+        key = input('Введите номер команды: ')
+        if key == '1':
+            client_id = input('Введите id клиента, для добавления телефона: ')
+            phone = input('Введите номер телефона: ')
+            print(add_phone(conn, client_id, phone))
+        elif key == '2':
+            first_name = None
+            last_name = None
+            client_id = input('Введите id клиента, для изменения данных: ')
+            first_name = input('Введите новое имя (если не меняется нажмите enter)')
+            if first_name == '': first_name = None
+            last_name = input('Введите новую фамилию (если не меняется нажмите enter)')
+            if last_name == '': last_name = None
+            email = input('Введите новый электронный адрес (если не меняется нажмите enter)')
+            if email == '': email = None
+            phones = []
+            while True:
+                phone = input('Введите новый номер телефона или "стоп" чтобы пропустить: ')
+                if phone == '':
+                    phone = input('Необходимо ввести номер телефона или "стоп" чтобы пропустить: ')
+                if phone == 'стоп':
+                    if phones == []:
+                        phones = None
+                    break
+                phones.append(phone)
+            print(change_client(conn, client_id, first_name, last_name, email, phones))
+        elif key == '3':
+            client_id = input('Введите id клиента для удаления телефона: ')
+            phone = input('Введите номер телефона для удаления: ')
+            print(delete_phone(conn,client_id, phone))
+            print()
+
+        elif key == '4':
+            client_id = input('Введите id клиента для удаления: ')
+            print(delete_client(conn, client_id))
+            print()
+
+        elif key == '5':
+            first_name = input('Введите имя для поиска(если не известно нажмите enter)')
+            if first_name == '': first_name = None
+            last_name = input('Введите фамилию для поиска (если не известна нажмите enter)')
+            if last_name == '': last_name = None
+            email = input('Введите электронный адрес для поиска (если не известен нажмите enter)')
+            if email == '': email = None
+            phone = input('Введите телефон для поиска (если не известен нажмите enter)')
+            if phone == '': phone = None
+            print(find_client(conn, first_name, last_name, email, phone))
+            print()
+
+        elif key == '6': break
+
+
 
 
 
